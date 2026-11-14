@@ -1,0 +1,66 @@
+CHAT SERVER
+
+SERVER :
+
+
+import socket
+import threading
+
+s = socket.socket()
+s.bind(("localhost", 5000))
+s.listen()
+clients = []
+
+def handle(c):
+    while True:
+        try:
+            msg = c.recv(1024)
+            if not msg:
+                break
+            for x in clients:
+                if x != c:
+                    x.sendall(msg)
+        except:
+            break
+    if c in clients:
+        clients.remove(c)
+    c.close()
+
+print("Chat Server Started...")
+while True:
+    c, addr = s.accept()
+    clients.append(c)
+    c.sendall(b"Welcome to chat server!")
+    threading.Thread(target=handle, args=(c,), daemon=True).start()
+
+CLIENT :
+
+
+import socket
+import threading
+
+s = socket.socket()
+s.connect(("localhost", 5000))
+
+name = input("Enter your name: ")
+
+def receive():
+    while True:
+        try:
+            msg = s.recv(1024).decode()
+            if not msg:
+                break
+            print("\n" + msg)
+        except:
+            break
+
+threading.Thread(target=receive, daemon=True).start()
+
+while True:
+    msg = input()
+    if msg.lower() == "exit":
+        break
+    s.sendall((name + ": " + msg).encode())
+
+s.close()
+

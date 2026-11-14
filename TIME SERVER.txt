@@ -1,0 +1,55 @@
+TIME SERVER: 
+
+Server:
+
+
+
+import socket
+from datetime import datetime
+
+HOST = "0.0.0.0"
+PORT = 5000
+
+server_socket = socket.socket(
+    socket.AF_INET,
+    socket.SOCK_DGRAM
+)
+
+server_socket.bind((HOST, PORT))
+
+print("Time Server is running...")
+print("Waiting for time requests...")
+
+while True:
+    data, client_address = server_socket.recvfrom(1024)
+
+    print("Request received from:", client_address)
+
+    current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+    server_socket.sendto(current_time.encode(), client_address)
+
+
+CLIENT:
+
+
+
+import socket
+
+SERVER_IP = input("Enter server IP address: ")
+PORT = 5000
+
+client_socket = socket.socket(
+    socket.AF_INET,
+    socket.SOCK_DGRAM
+)
+
+message = "TIME"
+
+client_socket.sendto(message.encode(), (SERVER_IP, PORT))
+
+data, server_address = client_socket.recvfrom(1024)
+
+print("Time received from server:", data.decode())
+
+client_socket.close()
